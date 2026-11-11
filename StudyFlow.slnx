@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/StudyFlow.Application/StudyFlow.Application.csproj" />
+    <Project Path="src/StudyFlow.Domain/StudyFlow.Domain.csproj" />
+    <Project Path="src/StudyFlow.Infrastructure/StudyFlow.Infrastructure.csproj" />
+    <Project Path="src/StudyFlow.Web/StudyFlow.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/StudyFlow.Domain.Tests/StudyFlow.Domain.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/StudyFlow.Benchmarks/StudyFlow.Benchmarks.csproj" />
+  </Folder>
+</Solution>

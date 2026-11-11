@@ -1,0 +1,6 @@
+<section class="metric"><span>@Label</span><strong>@Value</strong><small>@Hint</small></section>
+@code {
+    [Parameter, EditorRequired] public string Label { get; set; } = "";
+    [Parameter, EditorRequired] public string Value { get; set; } = "";
+    [Parameter] public string? Hint { get; set; }
+}

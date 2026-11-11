@@ -1,0 +1,37 @@
+@page "/"
+@inherits PlannerPage
+<PageTitle>Dashboard · StudyFlow</PageTitle>
+<header class="page-heading"><div><span class="eyebrow">YOUR STUDENT WORKSPACE</span><h1>Your study, in flow.</h1><p>A clear plan for the work that matters. @Today.ToString("dddd, dd MMMM")</p></div><a class="button" href="/assignments">Manage assignments →</a></header>
+<PlannerFeedback />
+@{ var summary = AnalyticsRules.Summarize(Planner.Tasks, Today); }
+<div class="metrics">
+    <StatCard Label="Assignments" Value="@summary.Total.ToString()" Hint="Across all your courses" />
+    <StatCard Label="Completed" Value="@summary.Completed.ToString()" Hint="One step at a time" />
+    <StatCard Label="Progress" Value="@($"{summary.CompletionPercent}%")" Hint="Of all assignments" />
+    <StatCard Label="Overdue" Value="@summary.Overdue.ToString()" Hint="Unfinished, before today" />
+</div>
+<div class="dashboard-grid">
+<section class="panel"><div class="panel-heading"><h2>Focus next</h2><span>SMART PRIORITY ENGINE</span></div>
+@if (Planner.Courses.Count == 0) { <div class="empty"><h3>Start with your courses</h3><p>Create a course, then add your first assignment.</p><a class="button" href="/courses">Create a course</a></div> }
+else if (!Ranked.Any()) { <div class="empty">Nothing in your queue. Add a task or enjoy the breathing room.</div> }
+else { @foreach(var task in Ranked.Take(5)) { <TaskCard @key="task.Id" Item="task" Course="@Planner.Courses.FirstOrDefault(c => c.Id == task.CourseId)" Today="Today" Weights="Planner.Weights" /> } }
+</section>
+<section class="panel"><h2>Make priority yours</h2><p>Adjust the importance of each signal. Weights apply to this browser session.</p>
+<form class="form" @onsubmit="ApplyWeights" @onsubmit:preventDefault>
+<label for="urgency">Deadline urgency · @urgency</label><input id="urgency" type="range" min="0" max="3" step="0.25" @bind="urgency" />
+<label for="importance-weight">Importance · @importance</label><input id="importance-weight" type="range" min="0" max="3" step="0.25" @bind="importance" />
+<label for="workload">Workload · @workload</label><input id="workload" type="range" min="0" max="3" step="0.25" @bind="workload" />
+<button class="button" type="submit">Apply weights</button>
+</form><p class="caption">A transparent heuristic, not a prediction. Open “Why?” on a task to inspect the calculation.</p>
+</section></div>
+<section class="panel section-gap"><div class="panel-heading"><h2>Coming up this week</h2><a href="/calendar">Open calendar →</a></div>
+@{ var upcoming = Planner.Tasks.Where(t => t.Status != TaskStatus.Done && t.DueDate >= Today && t.DueDate <= Today.AddDays(6)).OrderBy(t => t.DueDate).Take(6).ToArray(); }
+@if (upcoming.Length == 0) { <p class="empty">No deadlines in the next seven days.</p> }
+@foreach (var task in upcoming) { <div class="deadline-row"><strong>@task.Title</strong><span>@task.DueDate.ToString("ddd, dd MMM")</span></div> }
+</section>
+@code {
+    private IReadOnlyList<StudyTask> Ranked => TaskRules.Rank(Planner.Tasks, Today, Planner.Weights);
+    private double urgency = 1, importance = 1, workload = 1;
+    protected override async Task OnInitializedAsync() { await base.OnInitializedAsync(); urgency = Planner.Weights.Urgency; importance = Planner.Weights.Importance; workload = Planner.Weights.Workload; }
+    private void ApplyWeights() => Planner.SetWeights(new(urgency, importance, workload));
+}

@@ -1,0 +1,57 @@
+@page "/calendar"
+@inherits PlannerPage
+<PageTitle>Calendar · StudyFlow</PageTitle>
+<header class="page-heading"><div><span class="eyebrow">MAKE ROOM FOR FOCUS</span><h1>Calendar</h1><p>See your deadlines and turn available time into a study plan.</p></div><a class="button" href="/assignments">Manage assignments</a></header>
+<PlannerFeedback />
+<section class="panel"><div class="panel-heading"><h2>@month.ToString("MMMM yyyy")</h2><div class="actions"><button aria-label="Previous month" @onclick="() => month = month.AddMonths(-1)">←</button><button @onclick="() => month = new DateOnly(Today.Year, Today.Month, 1)">Today</button><button aria-label="Next month" @onclick="() => month = month.AddMonths(1)">→</button></div></div>
+<div class="calendar-grid" aria-label="Monthly deadlines">
+@foreach (var label in new[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" }) { <div class="weekday">@label</div> }
+@{ var offset = ((int)month.DayOfWeek + 6) % 7; var first = month.AddDays(-offset); var byDate = Planner.Tasks.ToLookup(t => t.DueDate); }
+@foreach(var day in Enumerable.Range(0, 42).Select(i => first.AddDays(i)))
+{
+<div class="calendar-day @(day.Month != month.Month ? "muted-day" : "") @(day == Today ? "today" : "")"><time datetime="@day.ToString("yyyy-MM-dd")">@day.Day</time>
+@foreach(var task in byDate[day].OrderBy(t => t.Title)) { <a href="/assignments" class="calendar-task @(task.Status == TaskStatus.Done ? "done" : "")" title="@($"{task.Title} · {task.EstimatedMinutes} min · {task.Status}")">@task.Title</a> }
+</div>
+}
+</div></section>
+<div class="two-column section-gap"><section class="panel"><h2>Your study windows</h2><p>Add availability. The proposal uses current priorities and does not allocate work after its deadline.</p>
+<form class="form" @onsubmit="AddSlot" @onsubmit:preventDefault><fieldset disabled="@Planner.IsBusy">
+<label for="slot-date">Study date</label><input id="slot-date" type="date" @bind="slotDate" required />
+<label for="slot-time">Start time</label><input id="slot-time" type="time" @bind="slotTime" required />
+<label for="slot-minutes">Available minutes</label><input id="slot-minutes" type="number" min="15" max="1440" @bind="slotMinutes" required />
+<button class="button" type="submit">Add study window</button></fieldset></form>
+
+@foreach (var slot in Planner.Windows.OrderBy(s => s.Start)) { <div class="deadline-row"><span>@slot.Start.ToString("dd MMM HH:mm") · @slot.Minutes min</span><button disabled="@Planner.IsBusy" aria-label="Remove study window @slot.Start" @onclick="() => RemoveSlot(slot)">Remove</button></div> }
+<p class="caption">Windows are saved automatically. Removing a window also removes its saved sessions. Past windows remain visible; only current and future windows are used for proposals.</p></section>
+<section class="panel"><h2>Suggested study plan</h2>
+@{ var proposal = ScheduleRules.Propose(Planner.Tasks, Planner.Windows.Where(w => DateOnly.FromDateTime(w.Start) >= Today).Select(w => new StudySlot(w.Start, w.Minutes)), Today, Planner.Weights); }
+@if (Planner.Windows.Count == 0) { <p class="empty">Add a study window to see an allocation.</p> }
+else if (proposal.Value is { } plan)
+{
+    @foreach (var allocation in plan.Allocations) { <div class="deadline-row"><div><strong>@Planner.Tasks.First(t => t.Id == allocation.TaskId).Title</strong><small>@allocation.Start.ToString("dd MMM HH:mm") – @allocation.Start.AddMinutes(allocation.Minutes).ToString("HH:mm")</small></div><span>@allocation.Minutes min</span></div> }
+    @if (plan.Allocations.Count == 0) { <p class="empty">No active assignments fit these windows.</p> }
+    <p class="caption">@plan.UnallocatedMinutes minutes remain unallocated. Add availability or revisit overdue deadlines. Estimates assume the full remaining task duration.</p>
+}
+else { <p class="error">@proposal.Error</p> }
+</section></div>
+<section class="panel section-gap"><div class="panel-heading"><h2>Saved study plan</h2><button class="button secondary" disabled="@Planner.IsBusy" @onclick="Planner.LoadAsync">Refresh</button></div>
+<p>This is a saved snapshot. Editing assignments does not move sessions automatically. Saving a new proposal replaces all saved sessions, including past ones.</p>
+@if (Planner.Sessions.Count == 0) { <p class="empty">No saved sessions yet.</p> }
+@foreach (var session in Planner.Sessions)
+{
+    var task = Planner.Tasks.FirstOrDefault(t => t.Id == session.TaskId);
+    <div class="deadline-row"><div><strong>@(task?.Title ?? "Removed assignment")</strong><small>@session.Start.ToString("dd MMM yyyy HH:mm") – @session.Start.AddMinutes(session.Minutes).ToString("HH:mm") · @task?.Status</small></div><span>@session.Minutes min</span></div>
+}
+@if (Planner.Sessions.Any()) { <label class="check"><input type="checkbox" @bind="replaceConfirmed" /> Replace all saved sessions with the current proposal</label> }
+<button class="button" disabled="@(Planner.IsBusy || Planner.Sessions.Any() && !replaceConfirmed)" @onclick="SavePlan">Save current proposal</button>
+</section>
+@code {
+    private DateOnly month = new(DateTime.Today.Year, DateTime.Today.Month, 1);
+    private DateTime slotDate = DateTime.Today;
+    private TimeOnly slotTime = new(16, 0);
+    private int slotMinutes = 60;
+    private bool replaceConfirmed;
+    private Task AddSlot() => Planner.AddWindowAsync(DateOnly.FromDateTime(slotDate).ToDateTime(slotTime), slotMinutes, Today);
+    private Task RemoveSlot(StudyWindow slot) => Planner.DeleteWindowAsync(slot);
+    private async Task SavePlan() { await Planner.SavePlanAsync(Today); if (Planner.Error is null) replaceConfirmed = false; }
+}

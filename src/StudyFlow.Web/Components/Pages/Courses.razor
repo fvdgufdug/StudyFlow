@@ -1,0 +1,37 @@
+@page "/courses"
+@inherits PlannerPage
+<PageTitle>Courses · StudyFlow</PageTitle>
+<header class="page-heading"><div><span class="eyebrow">BUILD YOUR SEMESTER</span><h1>Courses</h1><p>Keep subjects organized. Archive a course to preserve its assignments.</p></div><button class="button secondary" disabled="@Planner.IsBusy" @onclick="Planner.LoadAsync">Refresh</button></header>
+<PlannerFeedback />
+<div class="two-column">
+<section class="panel"><h2>@(editing is null ? "Add a course" : "Edit course")</h2>
+<form class="form" @onsubmit="Save" @onsubmit:preventDefault>
+<fieldset disabled="@Planner.IsBusy">
+<label for="course-name">Course name</label><input id="course-name" @bind="name" maxlength="80" required placeholder="e.g. Functional Programming" />
+<label for="course-color">Course color</label><input id="course-color" type="color" @bind="color" />
+<label class="check"><input type="checkbox" @bind="archived" /> Archived</label>
+<button class="button" type="submit">@(editing is null ? "Add course" : "Save course")</button>
+@if (editing is not null) { <button type="button" class="button secondary" @onclick="Reset">Cancel editing</button> }
+</fieldset></form></section>
+<section class="panel"><div class="panel-heading"><h2>Your courses</h2><span>@Planner.Courses.Count total</span></div>
+@if (Planner.Courses.Count == 0) { <p class="empty">No courses yet. Create your first course using the form.</p> }
+@foreach (var course in Planner.Courses)
+{
+    <article class="task-row" @key="course.Id"><div><CoursePill Course="course" /><small>@Planner.Tasks.Count(t => t.CourseId == course.Id) assignments</small></div>
+    <div class="actions"><button disabled="@Planner.IsBusy" @onclick="() => Edit(course)" aria-label="Edit @course.Name">Edit</button>
+    <button disabled="@Planner.IsBusy" @onclick="() => Archive(course)">@(course.Archived ? "Restore" : "Archive")</button>
+    @if (deleting == course.Id) { <span>Delete this course?</span><button class="danger" disabled="@Planner.IsBusy" @onclick="() => Delete(course)">Confirm delete</button><button @onclick="() => deleting = null">Cancel</button> }
+    else { <button disabled="@Planner.IsBusy" @onclick="() => deleting = course.Id" aria-label="Delete @course.Name">Delete</button> }</div></article>
+}
+</section></div>
+@code {
+    private Course? editing;
+    private Guid? deleting;
+    private string name = "", color = "#4263eb";
+    private bool archived;
+    private void Edit(Course course) { editing = course; name = course.Name; color = course.ColorHex; archived = course.Archived; }
+    private void Reset() { editing = null; name = ""; color = "#4263eb"; archived = false; }
+    private async Task Save() { await Planner.SaveCourseAsync(editing?.Id, name, color, archived, editing?.Revision ?? 0); if (Planner.Error is null) Reset(); }
+    private async Task Archive(Course course) { await Planner.SaveCourseAsync(course.Id, course.Name, course.ColorHex, !course.Archived, course.Revision); if (Planner.Error is null && editing?.Id == course.Id) Reset(); }
+    private async Task Delete(Course course) { await Planner.DeleteCourseAsync(course); deleting = null; if (Planner.Error is null && editing?.Id == course.Id) Reset(); }
+}

@@ -1,0 +1,3 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup><ProjectReference Include="../StudyFlow.Domain/StudyFlow.Domain.csproj" /></ItemGroup>
+</Project>

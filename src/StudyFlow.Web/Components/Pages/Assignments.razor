@@ -1,0 +1,69 @@
+@page "/assignments"
+@inherits PlannerPage
+<PageTitle>Assignments · StudyFlow</PageTitle>
+<header class="page-heading"><div><span class="eyebrow">A LITTLE PROGRESS, EVERY DAY</span><h1>Assignments</h1><p>Capture the work. Find your focus. Keep moving.</p></div><button class="button secondary" disabled="@Planner.IsBusy" @onclick="Planner.LoadAsync">Refresh</button></header>
+<PlannerFeedback />
+<div class="two-column">
+<section class="panel"><h2>@(editing is null ? "Add an assignment" : "Edit assignment")</h2>
+@if (!Planner.Courses.Any(c => !c.Archived) && editing is null) { <p>Create or restore a course before adding assignments.</p><a class="button" href="/courses">Manage courses</a> }
+else {
+<form @onsubmit="Save" @onsubmit:preventDefault class="form"><fieldset disabled="@Planner.IsBusy">
+<label for="title">Title</label><input id="title" @bind="title" maxlength="120" placeholder="e.g. Functional programming final" required />
+<label for="course">Course</label><select id="course" @bind="courseId" required><option value="@Guid.Empty">Choose a course</option>@foreach(var c in Planner.Courses.Where(c => !c.Archived || c.Id == editing?.CourseId)) { <option value="@c.Id">@c.Name@(c.Archived ? " (archived)" : "")</option> }</select>
+<label for="due">Due date</label><input id="due" type="date" @bind="dueDate" required />
+<label for="importance">Importance (1–5)</label><input id="importance" type="number" @bind="importance" min="1" max="5" required />
+<label for="minutes">Estimated minutes</label><input id="minutes" type="number" @bind="minutes" min="15" max="1440" required />
+<label for="status">Status</label><select id="status" @bind="status"><option value="@TaskStatus.ToDo">To do</option><option value="@TaskStatus.InProgress">In progress</option><option value="@TaskStatus.Done">Done</option></select>
+<button class="button" type="submit">@(editing is null ? "Add task" : "Save task")</button>
+@if (editing is not null) { <button class="button secondary" type="button" @onclick="Reset">Cancel editing</button> }
+</fieldset></form> }
+</section>
+<section class="panel"><div class="panel-heading"><h2>Your priority queue</h2><span>@Filtered.Count() matching</span></div>
+<div class="filters">
+<div><label for="search">Search</label><input id="search" placeholder="Search assignments…" @bind="search" @bind:event="oninput" @bind:after="FirstPage" /></div>
+<div><label for="filter-course">Course</label><select id="filter-course" @bind="filterCourse" @bind:after="FirstPage"><option value="@Guid.Empty">All courses</option>@foreach(var c in Planner.Courses) { <option value="@c.Id">@c.Name</option> }</select></div>
+<div><label for="filter-status">Status</label><select id="filter-status" @bind="filterStatus" @bind:after="FirstPage"><option value="all">All statuses</option><option value="active">Active</option><option value="done">Completed</option><option value="overdue">Overdue</option></select></div>
+<div><label for="filter-date">Due on or before</label><input id="filter-date" type="date" @bind="filterDate" @bind:after="FirstPage" /></div>
+<div><label for="sort">Sort</label><select id="sort" @bind="sort" @bind:after="FirstPage"><option value="priority">Priority</option><option value="date">Due date</option><option value="title">Title</option></select></div>
+</div>
+@if (!Filtered.Any()) { <div class="empty">No assignments match. Add a task or adjust your filters.</div> }
+@foreach (var task in Filtered.Skip((CurrentPage - 1) * PageSize).Take(PageSize))
+{
+<TaskCard @key="task.Id" Item="task" Course="@Planner.Courses.FirstOrDefault(c => c.Id == task.CourseId)" Today="Today" Weights="Planner.Weights" Editable="true" Disabled="Planner.IsBusy" OnEdit="Edit" OnToggle="Toggle" OnDelete="Delete" />
+}
+<div class="pagination"><button disabled="@(CurrentPage <= 1)" @onclick="() => page = CurrentPage - 1">Previous</button><span>Page @CurrentPage of @Pages</span><button disabled="@(CurrentPage >= Pages)" @onclick="() => page = CurrentPage + 1">Next</button></div>
+</section></div>
+@code {
+    private StudyTask? editing;
+    private string title = "", search = "", filterStatus = "all", sort = "priority";
+    private Guid courseId, filterCourse;
+    private DateTime dueDate = DateTime.Today.AddDays(7);
+    private DateTime? filterDate;
+    private int importance = 3, minutes = 60, page = 1;
+    private TaskStatus status = TaskStatus.ToDo;
+    private const int PageSize = 12;
+    private int Pages => Math.Max(1, (Filtered.Count() + PageSize - 1) / PageSize);
+    private int CurrentPage => Math.Clamp(page, 1, Pages);
+    private IEnumerable<StudyTask> Filtered
+    {
+        get
+        {
+            var tasks = Planner.Tasks.Where(t => t.Title.Contains(search, StringComparison.OrdinalIgnoreCase)
+                && (filterCourse == Guid.Empty || t.CourseId == filterCourse)
+                && (filterDate is null || t.DueDate <= DateOnly.FromDateTime(filterDate.Value))
+                && (filterStatus == "all" || filterStatus == "active" && t.Status != TaskStatus.Done || filterStatus == "done" && t.Status == TaskStatus.Done || filterStatus == "overdue" && t.Status != TaskStatus.Done && t.DueDate < Today));
+            return sort switch
+            {
+                "date" => tasks.OrderBy(t => t.DueDate).ThenBy(t => t.Title).ThenBy(t => t.Id),
+                "title" => tasks.OrderBy(t => t.Title, StringComparer.OrdinalIgnoreCase).ThenBy(t => t.Id),
+                _ => tasks.OrderBy(t => t.Status == TaskStatus.Done).ThenByDescending(t => TaskRules.Explain(t, Today, Planner.Weights).Total).ThenBy(t => t.DueDate).ThenBy(t => t.Title, StringComparer.OrdinalIgnoreCase).ThenBy(t => t.Id)
+            };
+        }
+    }
+    private void FirstPage() => page = 1;
+    private void Edit(StudyTask task) { editing = task; title = task.Title; courseId = task.CourseId; dueDate = task.DueDate.ToDateTime(TimeOnly.MinValue); importance = task.Importance; minutes = task.EstimatedMinutes; status = task.Status; }
+    private void Reset() { editing = null; title = ""; importance = 3; minutes = 60; status = TaskStatus.ToDo; courseId = Guid.Empty; dueDate = DateTime.Today.AddDays(7); }
+    private async Task Save() { await Planner.SaveTaskAsync(editing?.Id, courseId, title, DateOnly.FromDateTime(dueDate), importance, minutes, status, editing?.Revision ?? 0); if (Planner.Error is null) Reset(); }
+    private async Task Toggle(StudyTask task) { await Planner.SetStatusAsync(task, task.Status == TaskStatus.Done ? TaskStatus.ToDo : TaskStatus.Done); if (Planner.Error is null && editing?.Id == task.Id) Reset(); }
+    private async Task Delete(StudyTask task) { await Planner.DeleteTaskAsync(task); if (Planner.Error is null && editing?.Id == task.Id) Reset(); }
+}

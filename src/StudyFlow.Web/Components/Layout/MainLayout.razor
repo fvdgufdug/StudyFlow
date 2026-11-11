@@ -1,0 +1,17 @@
+@inherits LayoutComponentBase
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="shell">
+    <aside class="sidebar">
+        <a class="brand" href="/">◈ StudyFlow</a>
+        <nav aria-label="Main navigation">
+            <NavLink href="/" Match="NavLinkMatch.All">Dashboard</NavLink>
+            <NavLink href="/courses">Courses</NavLink>
+            <NavLink href="/assignments">Assignments</NavLink>
+            <NavLink href="/calendar">Calendar</NavLink>
+            <NavLink href="/analytics">Analytics</NavLink>
+        </nav>
+        <div class="sidebar-note">A little structure.<br />A lot more headspace.<hr />Student Planner · FP project</div>
+    </aside>
+    <main id="main" class="content">@Body</main>
+</div>
+<div id="blazor-error-ui" role="alert">The connection encountered an error. <a href="">Reload planner</a></div>

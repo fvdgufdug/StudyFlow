@@ -1,0 +1,46 @@
+{
+  "SchemaVersion": 1,
+  "Courses": [
+    {
+      "Id": "bcae6327-e36e-43bf-b2a5-4b28928a63ae",
+      "Name": "Математика — демо импорта",
+      "ColorHex": "#22c55e",
+      "Archived": false,
+      "Revision": 0
+    }
+  ],
+  "Tasks": [
+    {
+      "Id": "bd9ebad7-83a0-4fd5-b254-4605de952284",
+      "CourseId": "bcae6327-e36e-43bf-b2a5-4b28928a63ae",
+      "Title": "Решить задачи по производным",
+      "DueDate": "2026-11-12",
+      "Importance": 5,
+      "EstimatedMinutes": 60,
+      "Status": 0,
+      "Revision": 0
+    },
+    {
+      "Id": "5e1f0752-7991-471d-a258-73e884795801",
+      "CourseId": "bcae6327-e36e-43bf-b2a5-4b28928a63ae",
+      "Title": "Подготовиться к контрольной",
+      "DueDate": "2026-11-14",
+      "Importance": 4,
+      "EstimatedMinutes": 90,
+      "Status": 1,
+      "Revision": 0
+    },
+    {
+      "Id": "1618b8f3-09f2-4fad-b1fb-1d0f1094c401",
+      "CourseId": "bcae6327-e36e-43bf-b2a5-4b28928a63ae",
+      "Title": "Повторить основные формулы",
+      "DueDate": "2026-11-11",
+      "Importance": 3,
+      "EstimatedMinutes": 30,
+      "Status": 2,
+      "Revision": 0
+    }
+  ],
+  "Windows": [],
+  "Sessions": []
+}

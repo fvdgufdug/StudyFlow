@@ -1,0 +1,39 @@
+<article class="task-row">
+    <div class="task-content">
+        <CoursePill Course="Course" />
+        <strong class="@(Item.Status == TaskStatus.Done ? "done" : "")">@Item.Title</strong>
+        <small>@Item.DueDate.ToString("dd MMM yyyy") · @Item.EstimatedMinutes min · @Item.Status</small>
+        @if (Item.Status != TaskStatus.Done && Item.DueDate < Today) { <span class="overdue">Overdue</span> }
+        @if (Item.Status != TaskStatus.Done)
+        {
+            var score = TaskRules.Explain(Item, Today, Weights);
+            <details><summary>@score.Total.ToString("0.##") priority points · Why?</summary><p>Urgency @score.Urgency.ToString("0.##") + importance @score.Importance.ToString("0.##") + workload @score.Workload.ToString("0.##").</p></details>
+        }
+    </div>
+    @if (Editable)
+    {
+        <div class="actions">
+            <button type="button" disabled="@Disabled" @onclick="() => OnEdit.InvokeAsync(Item)" aria-label="Edit @Item.Title">Edit</button>
+            <button type="button" disabled="@Disabled" @onclick="() => OnToggle.InvokeAsync(Item)" aria-label="@(Item.Status == TaskStatus.Done ? $"Reopen {Item.Title}" : $"Complete {Item.Title}")">@(Item.Status == TaskStatus.Done ? "Reopen" : "Complete")</button>
+            @if (confirmDelete)
+            {
+                <span>Delete permanently?</span>
+                <button type="button" class="danger" disabled="@Disabled" @onclick="() => OnDelete.InvokeAsync(Item)">Confirm delete</button>
+                <button type="button" @onclick="() => confirmDelete = false">Cancel</button>
+            }
+            else { <button type="button" disabled="@Disabled" @onclick="() => confirmDelete = true" aria-label="Delete @Item.Title">Delete</button> }
+        </div>
+    }
+</article>
+@code {
+    [Parameter, EditorRequired] public StudyTask Item { get; set; } = null!;
+    [Parameter] public Course? Course { get; set; }
+    [Parameter] public DateOnly Today { get; set; }
+    [Parameter] public PriorityWeights Weights { get; set; } = new();
+    [Parameter] public bool Editable { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public EventCallback<StudyTask> OnEdit { get; set; }
+    [Parameter] public EventCallback<StudyTask> OnToggle { get; set; }
+    [Parameter] public EventCallback<StudyTask> OnDelete { get; set; }
+    private bool confirmDelete;
+}

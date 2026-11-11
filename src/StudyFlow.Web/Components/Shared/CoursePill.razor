@@ -1,0 +1,4 @@
+<span class="course-pill"><span class="course-dot" style="background:@(Course?.ColorHex ?? "#64748b")"></span>@(Course?.Name ?? "Unknown course")@(Course?.Archived == true ? " · Archived" : "")</span>
+@code {
+    [Parameter] public Course? Course { get; set; }
+}

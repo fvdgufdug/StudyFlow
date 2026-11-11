@@ -1,0 +1,13 @@
+@implements IDisposable
+@inject PlannerState Planner
+<div class="feedback" aria-live="polite" aria-busy="@Planner.IsBusy">
+    @if (Planner.IsBusy) { <p role="status">Saving / loading your planner…</p> }
+    else if (Planner.Error is not null) { <p class="error" role="alert">@Planner.Error</p> }
+    else if (Planner.Notice is not null) { <p role="status">@Planner.Notice</p> }
+</div>
+
+@code {
+    protected override void OnInitialized() => Planner.Changed += Refresh;
+    private void Refresh() => _ = InvokeAsync(StateHasChanged);
+    public void Dispose() => Planner.Changed -= Refresh;
+}
