@@ -1,8 +1,8 @@
 # StudyFlow — Student Planner
-Name: Yerkebulan Korganbek, Miras Kanatov
+*Name:* Yerkebulan Korganbek, Miras Kanatov
 
 
-Group: IT-2501
+*Group:* IT-2501
 
 A .NET 10 / Blazor planner for a two-student Introduction to Functional Programming final project. Existing starter extended with SQLite persistence, complete course/task CRUD, dashboard, calendar, analytics and an explainable priority engine.
 
