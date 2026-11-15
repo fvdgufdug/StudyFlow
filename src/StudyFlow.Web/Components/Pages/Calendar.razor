@@ -1,7 +1,7 @@
 @page "/calendar"
 @inherits PlannerPage
 <PageTitle>Calendar · StudyFlow</PageTitle>
-<header class="page-heading"><div><span class="eyebrow">MAKE ROOM FOR FOCUS</span><h1>Calendar</h1><p>See your deadlines and turn available time into a study plan.</p></div><a class="button" href="/assignments">Manage assignments</a></header>
+<header class="page-heading"><div><h1>Calendar</h1><p>View deadlines and plan study time.</p></div><a class="button" href="/assignments">Manage assignments</a></header>
 <PlannerFeedback />
 <section class="panel"><div class="panel-heading"><h2>@month.ToString("MMMM yyyy")</h2><div class="actions"><button aria-label="Previous month" @onclick="() => month = month.AddMonths(-1)">←</button><button @onclick="() => month = new DateOnly(Today.Year, Today.Month, 1)">Today</button><button aria-label="Next month" @onclick="() => month = month.AddMonths(1)">→</button></div></div>
 <div class="calendar-grid" aria-label="Monthly deadlines">

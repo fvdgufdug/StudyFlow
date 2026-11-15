@@ -28,7 +28,9 @@
 
 ## Shared release gate
 
-- [ ] Obtain/record instructor authorization and disclosure for AI use.
+- [ ] Obtain explicit instructor permission for AI use and credit permitted assistance (syllabus p. 4); permission is not established by this package.
+- [ ] Keep and finalize a concise report with the presentation (syllabus pp. 9-10).
+
 - [ ] Record real contributions and mutual reviews from both students in version control.
 - [ ] Run CI on GitHub; verify supported platforms rather than infer compatibility.
 - [ ] Rehearse the entire 15–20 minute defense with either student explaining every module.

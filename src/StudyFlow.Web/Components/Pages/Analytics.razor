@@ -1,7 +1,7 @@
 @page "/analytics"
 @inherits PlannerPage
 <PageTitle>Analytics · StudyFlow</PageTitle>
-<header class="page-heading"><div><span class="eyebrow">SEE THE BIGGER PICTURE</span><h1>Analytics</h1><p>Real progress and remaining workload, calculated from your assignments.</p></div><a class="button secondary" href="/export" download="studyflow.json">Export JSON ↓</a></header>
+<header class="page-heading"><div><h1>Analytics</h1><p>View completed assignments and remaining work.</p></div><a class="button secondary" href="/export" download="studyflow.json">Export JSON</a></header>
 <PlannerFeedback />
 @{ var summary = AnalyticsRules.Summarize(Planner.Tasks, Today); var week = AnalyticsRules.Week(Planner.Tasks, Today); var maximum = Math.Max(1, week.Max(d => d.Minutes)); }
 <div class="metrics"><StatCard Label="Completion" Value="@($"{summary.CompletionPercent}%")" Hint="Current assignment status" /><StatCard Label="Remaining effort" Value="@($"{summary.RemainingMinutes / 60.0:0.#} h")" Hint="Estimated, not tracked time" /><StatCard Label="Overdue" Value="@summary.Overdue.ToString()" Hint="Active assignments before today" /><StatCard Label="Active courses" Value="@Planner.Courses.Count(c => !c.Archived).ToString()" Hint="Archived courses excluded" /></div>

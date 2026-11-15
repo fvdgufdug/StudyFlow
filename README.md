@@ -1,60 +1,67 @@
-# StudyFlow — Student Planner
-**Name:** Yerkebulan Korganbek, Miras Kanatov
+# StudyFlow
 
+StudyFlow is a student planner built with C#, Blazor and SQLite for the Functional Programming final project.
 
-**Group:** IT-2501
+Team: Yerkebulan Korganbek and Miras Kanatov. Group: IT-2501.
 
-A .NET 10 / Blazor planner for a two-student Introduction to Functional Programming final project. Existing starter extended with SQLite persistence, complete course/task CRUD, dashboard, calendar, analytics and an explainable priority engine.
+## Run the project
 
-## Run
-
-Install .NET 10 SDK. From the repository root:
+Install the .NET 10 SDK, then run these commands from this folder:
 
 ```sh
 dotnet restore
-dotnet build --no-restore
-dotnet test --no-build
+dotnet build
+dotnet test
 dotnet run --project src/StudyFlow.Web --urls http://127.0.0.1:5080
 ```
 
-Open <http://127.0.0.1:5080>. Start with **Courses → Add course**, then create assignments. No preloaded personal data is required. SQLite migrations run automatically at startup. The default database is `src/StudyFlow.Web/App_Data/studyflow.db`; it survives process restarts. Set `StudyFlow__DatabasePath` to choose another file.
+Open http://127.0.0.1:5080. Add a course, then add assignments.
 
-This is a single-user local planner: all browser sessions share the same database. It has no accounts or per-user isolation. Keep local binding for this version. Server-local dates define “today”; the interface uses English formatting. Interactive Server requires a connection. Priority weights are temporary session state; courses, assignments, study windows and confirmed sessions are persistent.
+## What it does
 
-## Features
+- Courses: add, edit, archive and delete empty courses.
+- Assignments: add, edit, complete, search and filter.
+- Dashboard: see progress and assignments ordered by priority.
+- Calendar: enter available time and save a proposed study plan.
+- Analytics: see remaining work and export or import JSON data.
 
-- Courses: create, rename, recolor, archive/restore, delete empty courses.
-- Assignments: create, edit, change course/status/date/effort, complete, reopen, confirm deletion.
-- Search, course/status/due-date filters, stable sorting and 12-item page rendering.
-- Dashboard: totals, completion, overdue work, ranked recommendations and upcoming deadlines.
-- Smart Priority Engine: adjustable urgency/importance/workload weights with visible breakdowns.
-- Calendar: monthly deadlines, persistent non-overlapping study windows, capacity-limited proposals and explicitly saved study sessions.
-- Analytics: remaining effort, per-course completion, seven-day deadline workload and validated JSON backup export/import.
-- Optimistic concurrency, relational constraints, transactional operations and validation/error feedback.
+The priority score uses the deadline, importance and estimated duration. It is a calculation, not AI. Select **Why?** to see the calculation.
 
-## Verification
+## How the code is organized
 
-```sh
-dotnet test --collect:"XPlat Code Coverage" --results-directory artifacts/coverage
-dotnet run -c Release --project tools/StudyFlow.Benchmarks
-cd tests/e2e
-npm ci
-npx playwright install chromium
-npm test
-```
+| Project | Purpose |
+| --- | --- |
+| Domain | Records, validation, priority calculations and scheduling |
+| Application | Actions, shared page state and the storage interface |
+| Infrastructure | SQLite storage using Entity Framework Core |
+| Web | Blazor pages, components and CSS |
+| tests | Unit, integration and browser tests |
 
-Browser tests start a separate server on port 5081 with an isolated database. See [QA evidence](docs/QA_REPORT.md) for measured results and remaining checks. `.github/workflows/ci.yml` defines a three-OS .NET matrix and Linux Chromium checks; remote execution is not yet verified.
+The main FP examples are records and `with` expressions, pure functions with explicit inputs, LINQ transformations, and `Result` values for errors. Database writes and UI events are handled outside the domain rules.
 
-## Architecture and documents
+## Storage and limits
 
-- Domain: immutable records, pure validation, priority, analytics, scheduling and `Result<T>` composition.
-- Application: repository contract, asynchronous use cases and scoped planner state.
-- Infrastructure: EF Core SQLite, migrations, constraints and concurrency handling.
-- Web: five pages and reusable components; composition root wires infrastructure to interfaces.
-- Tests: domain, application, file-backed SQLite integration and Playwright browser scenarios.
+The database is created automatically in `src/StudyFlow.Web/App_Data/studyflow.db`. Set `StudyFlow__DatabasePath` to use another location. Data remains after restarting the app.
 
-Read [specification](docs/TECHNICAL_SPECIFICATION.md), [architecture](docs/ARCHITECTURE.md), [user guide](docs/USER_GUIDE.md), [rubric mapping](docs/RUBRIC_MAPPING.md), and [Russian defense guide](docs/DEFENSE_GUIDE_RU.md).
+This is a local, single-user application. All browser sessions share the database. There are no accounts or cloud synchronization. Priority settings last for the browser session. Dates use the server's local time. Keep the local address above for this version.
 
-## Remaining release work
+Known issues: the scheduler can use elapsed hours today; large exports can exceed the import limit. See `docs/SIMPLIFICATION_NOTES.md`.
 
-Persistent priority preferences, historical completion trends, authentication, dark mode and database-level pagination are not implemented. Cross-OS/browser checks, a deployed demo and actual two-person code reviews still need evidence. Instructor approval/disclosure for AI assistance remains a submission requirement stated in the supplied specification; this repository does not establish approval or guarantee a grade.
+## Tests and documentation
+
+Run `dotnet test` for unit and integration tests. Browser tests are in `tests/e2e`; run `npm ci`, `npx playwright install chromium` and `npm test` there after building the application.
+
+- [Architecture](docs/ARCHITECTURE.md)
+- [User guide](docs/USER_GUIDE.md)
+- [Technology comparison](docs/TECH_COMPARISON.md)
+- [Rubric checklist](docs/RUBRIC_MAPPING.md)
+- [Recorded test results](docs/QA_REPORT.md)
+- [Backup format](docs/BACKUP_FORMAT.md)
+
+Both students must contribute code and be ready to explain every part during the defense. Record actual contributions, not a proposed division of work.
+
+## Syllabus requirements
+
+The course syllabus, page 4, requires explicit instructor permission to use AI tools and treats uncredited or unauthorized AI-generated work as plagiarism. This package does not establish that permission has been granted. Credit permitted assistance accurately; simpler wording or styling does not change these requirements.
+
+Keep a concise project report and the presentation: the syllabus assessment table (pages 9-10) evaluates report/presentation quality and detailed documentation. Explain the design, functional programming concepts, tests, limitations and actual contributions. Each student must be able to explain the code during the defense (page 4). See [syllabus corrections](docs/SYLLABUS_REQUIREMENTS.md).

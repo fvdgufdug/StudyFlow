@@ -1,10 +1,10 @@
 # StudyFlow — Technical Specification
 
-**Course:** Introduction to Functional Programming (FP 3222). **Team:** two students, names pending. **Updated:** 9 November 2026. **Status:** implemented local planner with verified .NET/SQLite/Chromium flows; release and defense evidence still incomplete.
+**Course:** Introduction to Functional Programming (FP 3222). **Team:** two students, names pending. **Syllabus clarification:** 15 November 2026. **Status:** implemented local planner with verified .NET/SQLite/Chromium flows; release and defense evidence still incomplete.
 
 ## Source requirements and design choices
 
-The supplied project specification records these instructor requirements: individual or maximum two-person team; both members code; a 15–20 minute oral defense with either member questioned on every module; 20 criteria worth 5% each; presentation covering team/title/aim/goals/plan, technology comparison, architecture, relevance, methodology and mockups. It also records syllabus permission/disclosure requirements for AI contributions. Original instructor handouts are not present in this repository, so this mapping relies on the supplied specification and is not an independent verification of those handouts.
+The supplied project specification records these instructor requirements: individual or maximum two-person team; both members code; a 15–20 minute oral defense with either member questioned on every module; 20 criteria worth 5% each; presentation covering team/title/aim/goals/plan, technology comparison, architecture, relevance, methodology and mockups. The supplied final-requirements document and course syllabus have now been reviewed. The course syllabus, page 4, requires explicit instructor permission to use AI tools and treats uncredited or unauthorized AI-generated work as plagiarism. This package does not establish that permission has been granted. Credit permitted assistance accurately; simpler wording or styling does not change these requirements. Keep the report and presentation; their quality is assessed in the syllabus on pages 9-10.
 
 .NET 10, Blazor Interactive Server, EF Core SQLite and CI are team design choices. The intended result is a strong final project, not a guaranteed grade.
 
@@ -54,4 +54,4 @@ Single-user local deployment; all sessions share one DB. No authentication or au
 
 Student A proposed ownership: domain, priority/scheduling, application/repository tests, benchmarks. Student B: reusable components, CRUD forms, analytics/calendar UI, browser tests and docs. Both must review and explain the whole architecture. Actual contribution history must be recorded from their work; this workspace initially has no Git repository, so commits/PR reviews are not available as evidence.
 
-Remaining submission items: instructor permission/disclosure, actual student contributions and reviews, additional platform checks, final slide deck with names, rehearsed demo, optional published demo/backup recording, LMS submission. See [rubric mapping](RUBRIC_MAPPING.md), [defense guide](DEFENSE_GUIDE_RU.md), and [release backlog](SPRINT_2_BACKLOG.md).
+Remaining submission items: explicit instructor permission for AI use and accurate credit for permitted assistance, a concise report, actual student contributions and reviews, additional platform checks, final slide deck with names, rehearsed demo, optional published demo/backup recording, LMS submission. See [rubric mapping](RUBRIC_MAPPING.md), [defense guide](DEFENSE_GUIDE_RU.md), and [release backlog](SPRINT_2_BACKLOG.md).

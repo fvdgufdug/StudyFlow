@@ -1,7 +1,7 @@
 @page "/courses"
 @inherits PlannerPage
 <PageTitle>Courses · StudyFlow</PageTitle>
-<header class="page-heading"><div><span class="eyebrow">BUILD YOUR SEMESTER</span><h1>Courses</h1><p>Keep subjects organized. Archive a course to preserve its assignments.</p></div><button class="button secondary" disabled="@Planner.IsBusy" @onclick="Planner.LoadAsync">Refresh</button></header>
+<header class="page-heading"><div><h1>Courses</h1><p>Add and edit courses. Archived courses keep their assignments.</p></div><button class="button secondary" disabled="@Planner.IsBusy" @onclick="Planner.LoadAsync">Refresh</button></header>
 <PlannerFeedback />
 <div class="two-column">
 <section class="panel"><h2>@(editing is null ? "Add a course" : "Edit course")</h2>
